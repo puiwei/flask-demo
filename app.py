@@ -25,22 +25,13 @@ def ticker():
         checklist += [check for check in [request.form.get('close'), request.form.get('adj_close'), request.form.get('open'), request.form.get('adj_open')] if check is not None]
 
         stock_json=requests.get('https://www.quandl.com/api/v3/datatables/WIKI/PRICES.json?api_key=iRHkEhN5P7YxWaAy_djY')
-        df = pd.read_json('https://www.quandl.com/api/v3/datatables/WIKI/PRICES.json?api_key=iRHkEhN5P7YxWaAy_djY')
-
         stockload = json.loads(stock_json.content)
-        stockload2 = stockload['datatable']   #dict of columns and data
-        colname = stockload2['columns']
-        #df3 = pd.DataFrame(stockload2['data'], columns=stockload2['columns'])
-        df3 = pd.DataFrame.from_dict(stockload2['data'], orient='index');
-        #df2 = pd.read_json(stock_json.content['datatable'])
-
+        stocktable = stockload['datatable']   #dict of data(list of lists) and columns(list of dicts with type and name)
+        colname = [col['name'] for col in stocktable['columns']]   #list of column names, with name from each dict in the stocktable columns list
+        df = pd.DataFrame(stocktable['data'], columns=colname)    #create DataFrame with data(list of rows) and colname(list of column name strings)
 
         if request.form.get('close'):
             value=value+'C'
-
-
-
-
 
 
         return render_template('graph.html', value=value)
