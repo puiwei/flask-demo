@@ -17,8 +17,8 @@ def render_static(page_name):
 def ticker():
     if request.method == 'POST':
         value=request.form['symbol']
-        if request.form['closing']:
-            value=value+'c'
+        if request.form.get('closing'):
+            value=value+'C'
     return render_template('graph.html', value=value)
 
 # starts the web server, http://localhost:33507 to view
