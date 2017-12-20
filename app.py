@@ -1,4 +1,7 @@
 from flask import Flask, render_template, request, redirect
+import requests
+import simplejson as json
+import pandas as pd
 
 app = Flask(__name__)
 
@@ -16,10 +19,31 @@ def render_static(page_name):
 @app.route('/ticker', methods=['GET','POST'])
 def ticker():
     if request.method == 'POST':
-        value=request.form['symbol']
-        if request.form.get('closing'):
+        value = request.form['symbol']
+        checklist = []
+        # get list of checked boxes
+        checklist += [check for check in [request.form.get('close'), request.form.get('adj_close'), request.form.get('open'), request.form.get('adj_open')] if check is not None]
+
+        stock_json=requests.get('https://www.quandl.com/api/v3/datatables/WIKI/PRICES.json?api_key=iRHkEhN5P7YxWaAy_djY')
+        df = pd.read_json('https://www.quandl.com/api/v3/datatables/WIKI/PRICES.json?api_key=iRHkEhN5P7YxWaAy_djY')
+
+        stockload = json.loads(stock_json.content)
+        stockload2 = stockload['datatable']   #dict of columns and data
+        colname = stockload2['columns']
+        #df3 = pd.DataFrame(stockload2['data'], columns=stockload2['columns'])
+        df3 = pd.DataFrame.from_dict(stockload2['data'], orient='index');
+        #df2 = pd.read_json(stock_json.content['datatable'])
+
+
+        if request.form.get('close'):
             value=value+'C'
-    return render_template('graph.html', value=value)
+
+
+
+
+
+
+        return render_template('graph.html', value=value)
 
 # starts the web server, http://localhost:33507 to view
 if __name__ == '__main__':
