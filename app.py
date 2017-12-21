@@ -14,7 +14,7 @@ from math import pi
 class MyFlask(Flask):
     def get_send_file_max_age(self, filename):
         if (filename == "bgraph.html"):
-            return 1;
+            return 1
         return Flask.get_send_file_max_age(self, filename)
 
 app = MyFlask(__name__)
@@ -24,7 +24,7 @@ app = MyFlask(__name__)
 def index():
     return render_template('index.html')
 
-# when /ticker REST URL is evoked, return graph.html with value
+# when /ticker REST URL is evoked, return graph.html which would include the header and bgraph
 @app.route('/ticker', methods=['GET','POST'])
 def ticker():
     if request.method == 'POST':
@@ -48,7 +48,6 @@ def ticker():
         colname = [col['name'] for col in stocktable['columns']]   #list of column names, with name from each dict in the stocktable columns list
         dframe = pd.DataFrame(stocktable['data'], columns=colname)    #create DataFrame with data(list of rows) and colname(list of column name strings)
         '''
-
         # get API data using REST URL with user's input stock symbol and date range for past 30 days
         API_data = requests.get('https://www.quandl.com/api/v3/datasets/WIKI/'+symbol+'.json?start_date='+lastmo_str+'&end_date='+today_str+'&api_key=iRHkEhN5P7YxWaAy_djY')
         stock_load = json.loads(API_data.content)
@@ -62,8 +61,7 @@ def ticker():
             checkedcol = df[[col for col in col_list]]    # dataframe with only the necessary data
 
 
-
-        # Display graph in a static HTML file
+        # Display bokeh plot in a static HTML file
         output_file('./static/bgraph.html', title='bokeh plot')
 
         # Create figure with figure options
