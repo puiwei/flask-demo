@@ -24,7 +24,7 @@ def ticker():
         checklist = []
         # get list of checked boxes
         checklist += [check for check in [request.form.get('Close'), request.form.get('Adj_Close'), request.form.get('Open'), request.form.get('Adj_Open')] if check is not None]
-        checklist_decode = [uname.encode("utf-8") for uname in checklist]
+        checklist = [uname.encode("utf-8") for uname in checklist]
         today = datetime.date.today()
         lastmonth = today - datetime.timedelta(days=30)
         today_str = today.strftime('%Y-%m-%d')
@@ -47,10 +47,11 @@ def ticker():
         if stock_load.get('quandl_error'):    # if error arise, likely due to incorrect stock symbol, create an empty DataFrame
             df = pd.DataFrame()
         else:
-            stock_data = stock_load['dataset']['data']   #list of lists (rows of data)
-            col_names = stock_load['dataset']['column_names']    #list of strings
+            stock_data = stock_load['dataset']['data']   # list of lists (rows of data)
+            col_names = stock_load['dataset']['column_names']    # list of strings
             df = pd.DataFrame(stock_data, columns=col_names)
-            checkedcol = df[[col for col in checklist_decode]]
+            checklist.insert(0,'Date')    # list of columns to extract
+            checkedcol = df[[col for col in checklist]]    # dataframe with only the necessary data
 
 
         if request.form.get('Close'):
