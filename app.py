@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, send_from_directory
 import requests
 import simplejson as json
 import pandas as pd
@@ -10,11 +10,6 @@ app = Flask(__name__)
 @app.route('/')
 def index():
     return render_template('index.html')
-
-# when /static_page_name is evoked, return the page's html
-@app.route('/<string:page_name>/')
-def render_static(page_name):
-    return render_template('%s' % page_name)
 
 # when /ticker REST URL is evoked, return graph.html with value
 @app.route('/ticker', methods=['GET','POST'])
@@ -35,6 +30,7 @@ def ticker():
         # however this REST URL does not allow for filtering, and is too large and inefficient for this milestone project's purposes
         # hence the REST URL for individal stock data which allows for filtering is used instead
         stock_json=requests.get('https://www.quandl.com/api/v3/datatables/WIKI/PRICES.json?api_key=iRHkEhN5P7YxWaAy_djY')
+<<<<<<< Updated upstream
         stockload = json.loads(stock_json.content)
         stocktable = stockload['datatable']   #dict of data(list of lists) and columns(list of dicts with type and name)
         colname = [col['name'] for col in stocktable['columns']]   #list of column names, with name from each dict in the stocktable columns list
