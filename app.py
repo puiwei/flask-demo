@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, send_from_directory
+from flask import Flask, render_template, request, redirect
 import requests
 import simplejson as json
 import pandas as pd
@@ -30,7 +30,6 @@ def ticker():
         # however this REST URL does not allow for filtering, and is too large and inefficient for this milestone project's purposes
         # hence the REST URL for individal stock data which allows for filtering is used instead
         stock_json=requests.get('https://www.quandl.com/api/v3/datatables/WIKI/PRICES.json?api_key=iRHkEhN5P7YxWaAy_djY')
-<<<<<<< Updated upstream
         stockload = json.loads(stock_json.content)
         stocktable = stockload['datatable']   #dict of data(list of lists) and columns(list of dicts with type and name)
         colname = [col['name'] for col in stocktable['columns']]   #list of column names, with name from each dict in the stocktable columns list
