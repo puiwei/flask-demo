@@ -1,10 +1,23 @@
 from flask import Flask, render_template, request, redirect
 import requests
 import simplejson as json
-import pandas as pd
 import datetime
+import pandas as pd
+import numpy as np
+from bokeh.plotting import figure, show, save, output_file
+from bokeh.palettes import Spectral4 as palette
+from bokeh.models import SingleIntervalTicker, LinearAxis, DaysTicker
+from math import pi
 
-app = Flask(__name__)
+# As all static files get cached, and Bokeh by default outputs a static file, hence bgraph.html is cached
+# To work around this, sub-classing the Flask main class to set cache timeout time to 1 sec for bgraph.html so that it would load a new page
+class MyFlask(Flask):
+    def get_send_file_max_age(self, filename):
+        if (filename == "bgraph.html"):
+            return 1;
+        return Flask.get_send_file_max_age(self, filename)
+
+app = MyFlask(__name__)
 
 # default home page
 @app.route('/')
@@ -45,15 +58,39 @@ def ticker():
             stock_data = stock_load['dataset']['data']   # list of lists (rows of data)
             col_names = stock_load['dataset']['column_names']    # list of strings
             df = pd.DataFrame(stock_data, columns=col_names)
-            checklist.insert(0,'Date')    # list of columns to extract
-            checkedcol = df[[col for col in checklist]]    # dataframe with only the necessary data
+            col_list = ['Date'] + checklist    # list of columns to extract
+            checkedcol = df[[col for col in col_list]]    # dataframe with only the necessary data
 
 
-        if request.form.get('Close'):
-                symbol=symbol+'C'
+
+        # Display graph in a static HTML file
+        output_file('./static/bgraph.html', title='bokeh plot')
+
+        # Create figure with figure options
+        p1 = figure(title = 'Quandl WIKI Stock Prices for '+symbol, x_axis_type='datetime')
+        p1.xaxis.axis_label = "Date"
+        p1.yaxis.axis_label = "Stock Prices"
+
+        if not df.empty:
+
+            # Convert to Bokeh datetime axis_type to change the display ticks based on scale of the plot
+            def convert_date(date):
+                return np.array(date, dtype=np.datetime64)
+
+            # Add renderer with visual customizations
+            for index, item in enumerate(checklist):
+                p1.line(convert_date(df['Date']), df[item], color=palette[index], legend=item)
+
+            # Display x-axis labels at more frequent ticker intervals (every 2 days) than default
+            # Orient x-axis labels at a diagonal to prevent overlapping
+            p1.xaxis[0].ticker = DaysTicker(days=np.arange(1,31,2))
+            p1.xaxis.major_label_orientation = pi/4
+            p1.legend.location = 'top_center'
+
+        save(p1)
 
 
-        return render_template('graph.html', value=symbol)
+        return render_template('graph.html')
 
 # starts the web server, http://localhost:33507 to view
 if __name__ == '__main__':
