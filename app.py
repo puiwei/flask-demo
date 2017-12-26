@@ -5,26 +5,32 @@ import datetime
 import pandas as pd
 import numpy as np
 from bokeh.plotting import figure, show, save, output_file
+from bokeh.embed import components
 from bokeh.palettes import Spectral4 as palette
 from bokeh.models import SingleIntervalTicker, LinearAxis, DaysTicker
 from math import pi
 
+
+# Embedding plot using Bokeh's components function instead of loading bgraph.html
+# Hence no need of this sub-classing solution (keep as comments for future reference):
 # As all static files get cached, and Bokeh by default outputs a static file, hence bgraph.html is cached
 # To work around this, sub-classing the Flask main class to set cache timeout time to 1 sec for bgraph.html so that it would load a new page
-class MyFlask(Flask):
-    def get_send_file_max_age(self, filename):
-        if (filename == "bgraph.html"):
-            return 1
-        return Flask.get_send_file_max_age(self, filename)
+#class MyFlask(Flask):
+#    def get_send_file_max_age(self, filename):
+#        if (filename == "bgraph.html"):
+#            return 1
+#        return Flask.get_send_file_max_age(self, filename)
 
-app = MyFlask(__name__)
+# app = MyFlask(__name__)
+
+app = Flask(__name__)
 
 # default home page
 @app.route('/')
 def index():
     return render_template('index.html')
 
-# when /ticker REST URL is evoked, return graph.html which would include the header and bgraph
+# when /ticker REST URL is evoked, return graph.html which would include the header and embedded bgraph
 @app.route('/ticker', methods=['GET','POST'])
 def ticker():
     if request.method == 'POST':
@@ -61,8 +67,8 @@ def ticker():
             checkedcol = df[[col for col in col_list]]    # dataframe with only the necessary data
 
 
-        # Display bokeh plot in a static HTML file
-        output_file('./static/bgraph.html', title='bokeh plot')
+        # Embedding with components function below instead of displaying bokeh plot in a static HTML file
+        # output_file('./static/bgraph.html', title='bokeh plot')
 
         # Create figure with figure options
         p1 = figure(title = 'Quandl WIKI Stock Prices for '+symbol, x_axis_type='datetime')
@@ -85,10 +91,12 @@ def ticker():
             p1.xaxis.major_label_orientation = pi/4
             p1.legend.location = 'top_center'
 
-        save(p1)
+        # Instead of saving it and then loading it in graph.html
+        # save(p1)
+        # Use the components function to embed the Bokeh plot inline in graph.html
+        script, div = components(p1)
 
-
-        return render_template('graph.html')
+        return render_template('graph.html', bkscript=script, bkdiv=div)
 
 # starts the web server, http://localhost:33507 to view
 if __name__ == '__main__':

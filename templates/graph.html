@@ -12,23 +12,30 @@
   <!-- Bootstrap core CSS -->
   <!-- Added Bokeh CSS and JS -->
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.11.0.min.css" type="text/css" />
+  <link rel="stylesheet" href="https://cdn.pydata.org/bokeh/release/bokeh-0.11.0.min.css" type="text/css">
 
   <script type="text/javascript" src="https://cdn.pydata.org/bokeh/release/bokeh-0.11.0.min.js"></script>
   <script type="text/javascript">
     Bokeh.set_log_level("info");
   </script>
+
+  <!-- safe is a Django setting that marks a string variable as not requiring further HTML escaping prior to output -->
+  {{ bkscript|safe }}
+
 </head>
 
 <body>
   <!-- Use script below to load header.html here -->
   <div id="header"></div>
 
-  <!-- Return Bokeh plot as value -->
+  <!-- Instead of loading Bokeh Plot here, embedding it instead
   <div class="container">
     <div class="row" id="bokehplot">
     </div>
   </div>
+  -->
+  {{ bkdiv|safe }}
+
   <!-- Bootstrap core JavaScript -->
   <!-- Placed at the end of the document so the pages load faster -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.js"></script>
@@ -37,6 +44,6 @@
 
 <script>
 $("#header").load("/static/header.html");
-$("#bokehplot").load("/static/bgraph.html");
+/* $("#bokehplot").load("/static/bgraph.html"); */ /*instead of loading bgraph.html, embedding plot with bkscript and bkdiv instead*/
 </script>
 </html>
